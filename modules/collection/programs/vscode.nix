@@ -15,7 +15,20 @@ in {
     enable = mkEnableOption "Visual Studio Code";
 
     package = mkPackageOption pkgs "vscode" {};
-
+    extensions = mkOption {
+      type = list package;
+      default = [];
+      description = ''
+        List of VSCode extensions to install.
+        Typically from `pkgs.vscode-extensions`.
+      '';
+      example = with pkgs.vscode-extensions; [
+        eamodio.gitlens
+        dbaeumer.vscode-eslint
+        catppuccin.catppuccin-vsc
+      ];
+     };
+    
     settings = mkOption {
       type = json.type;
       default = {};
@@ -38,7 +51,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    packages = [cfg.package];
+    packages = [cfg.package] ++ cfg.extensions;
     files = {
       ".config/Code/User/settings.json".source = mkIf (cfg.settings != {}) (
         json.generate "settings.json" cfg.settings
